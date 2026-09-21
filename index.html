@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assignment & Deadline Tracker</title>
+    <!-- Add Space Grotesk Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <!-- Hidden SVG Noise Filter -->
+    <svg style="width: 0; height: 0; position: absolute;" aria-hidden="true">
+      <filter id="noise">
+        <feTurbulence
+          type="turbulence"
+          baseFrequency="0.9"
+          numOctaves="2"
+          seed="1"
+          stitchTiles="stitch"
+          result="turbulence"
+        ></feTurbulence>
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="turbulence"
+          scale="30"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        ></feDisplacementMap>
+      </filter>
+    </svg>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

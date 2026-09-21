@@ -1,0 +1,29 @@
+.vmedulife-scanner-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999999;
+  background: linear-gradient(135deg, #3b82f6, #10b981);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-family: 'Inter', sans-serif, system-ui;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vmedulife-scanner-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.vmedulife-scanner-btn:active {
+  transform: translateY(0);
+}
