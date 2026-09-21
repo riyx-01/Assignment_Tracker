@@ -3,6 +3,7 @@ import { Calendar, Clock, BookOpen, User, CheckCircle2, Trash2, Edit2 } from 'lu
 import { getStatusDetails, formatDisplayDate } from '../utils/dates';
 
 export default function AssignmentCard({ assignment, onEdit, onDelete, onComplete }) {
+  const [showDetails, setShowDetails] = React.useState(false);
   const { level, text } = getStatusDetails(assignment.deadline, assignment.status);
 
   let bgClass = '';
@@ -38,7 +39,7 @@ export default function AssignmentCard({ assignment, onEdit, onDelete, onComplet
           </div>
         </div>
 
-        <div className="space-y-3 mb-8 flex-grow">
+        <div className="space-y-3 mb-4 flex-grow">
           <div className="flex items-center gap-3">
             <User className="w-4 h-4 text-gray-800 shrink-0" />
             <span className="theme-desc text-sm truncate" title={assignment.instructor}>{assignment.instructor || 'N/A'}</span>
@@ -51,6 +52,26 @@ export default function AssignmentCard({ assignment, onEdit, onDelete, onComplet
             <Calendar className="w-4 h-4 text-gray-800 shrink-0" />
             <span className="theme-desc text-sm">Marks: <strong className="font-bold">{assignment.totalMarks || '-'}</strong></span>
           </div>
+
+          {assignment.details && (
+            <div className="pt-2">
+              <button 
+                type="button"
+                onClick={() => setShowDetails(!showDetails)}
+                className="w-full py-1.5 px-3 bg-white/50 hover:bg-white/80 text-xs font-bold text-gray-700 rounded-xl flex items-center justify-between transition-colors border border-white/40 shadow-sm"
+              >
+                <span>{showDetails ? 'Hide Questions' : '📖 View Assignment Questions'}</span>
+                <span className="text-[10px] bg-[#e581a2]/20 text-[#e581a2] px-1.5 py-0.5 rounded-full font-bold">
+                  {showDetails ? '▲' : '▼'}
+                </span>
+              </button>
+              {showDetails && (
+                <div className="mt-2 p-3 bg-white/80 rounded-xl text-xs text-gray-800 border border-white/60 max-h-44 overflow-y-auto whitespace-pre-line leading-relaxed font-medium shadow-sm">
+                  {assignment.details}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="mt-auto pt-4 border-t border-white/20">

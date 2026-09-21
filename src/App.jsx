@@ -5,7 +5,10 @@ import { setupNotifications } from './utils/notifications';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('isAuthenticated') === 'true';
+    return (
+      sessionStorage.getItem('isAuthenticated') === 'true' ||
+      localStorage.getItem('isAuthenticated') === 'true'
+    );
   });
 
   useEffect(() => {
@@ -14,6 +17,7 @@ function App() {
 
   const handleLogin = () => {
     sessionStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('isAuthenticated', 'true');
     setIsAuthenticated(true);
   };
 
