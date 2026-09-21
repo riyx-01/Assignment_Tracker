@@ -80,6 +80,23 @@ export function useAssignments() {
     localStorage.setItem('tracker_assignments', JSON.stringify(assignments));
   }, [assignments]);
 
+  // Listen for the custom event emitted by the Chrome Extension (sync.js)
+  useEffect(() => {
+    const handleSync = () => {
+      const saved = localStorage.getItem('tracker_assignments');
+      if (saved) {
+        try {
+          setAssignments(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to parse synced data");
+        }
+      }
+    };
+    
+    window.addEventListener('tracker_sync', handleSync);
+    return () => window.removeEventListener('tracker_sync', handleSync);
+  }, []);
+
   const addAssignment = (assignment) => {
     setAssignments(prev => [...prev, { ...assignment, id: Date.now() }]);
   };

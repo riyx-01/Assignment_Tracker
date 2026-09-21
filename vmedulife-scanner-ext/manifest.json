@@ -2,13 +2,20 @@
   "manifest_version": 3,
   "name": "Vmedulife Scanner for Assignment Tracker",
   "version": "1.0",
-  "description": "Scans Vmedulife assignment pages and exports pending assignments as JSON.",
-  "permissions": ["activeTab"],
+  "description": "Scans Vmedulife assignment pages and automatically syncs them to your Assignment Tracker.",
+  "permissions": ["activeTab", "storage", "tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["*://*.vmedulife.com/*"],
       "js": ["content.js"],
       "css": ["styles.css"]
+    },
+    {
+      "matches": ["http://localhost:5173/*", "*://*.vercel.app/*"],
+      "js": ["sync.js"]
     }
   ],
   "action": {

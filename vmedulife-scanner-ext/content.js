@@ -52,30 +52,46 @@ function scanAndDownload() {
     return;
   }
 
-  const rows = targetTable.querySelectorAll('tbody tr');
+  const headerCells = targetTable.querySelector('tr').querySelectorAll('th, td');
+  const headers = Array.from(headerCells).map(th => th.textContent.trim().toLowerCase());
+  
+  // Default indices based on typical Vmedulife structure
+  let cSubj = 2, cInst = 3, cTitle = 4, cDesc = 5, cMarks = 6, cAct = 10, cDates = 11;
+  
+  // Dynamically map columns if headers exist
+  headers.forEach((h, i) => {
+    if (h.includes('subject')) cSubj = i;
+    if (h.includes('instructor')) cInst = i;
+    if (h.includes('title')) cTitle = i;
+    if (h.includes('instructions')) cDesc = i;
+    if (h.includes('total marks')) cMarks = i;
+    if (h.includes('action')) cAct = i;
+    if (h.includes('validity') || h.includes('date')) cDates = i;
+  });
+
+  const rows = targetTable.querySelectorAll('tbody tr, tr');
   
   rows.forEach((row, index) => {
-    const cells = row.querySelectorAll('td');
-    if (cells.length >= 10) {
-      const subject = cells[2]?.textContent.trim() || '';
-      const instructor = cells[3]?.textContent.trim() || '';
-      const title = cells[4]?.textContent.trim() || '';
-      const instructions = cells[5]?.textContent.trim() || '';
-      const totalMarks = parseFloat(cells[6]?.textContent.trim() || '0');
-      
-      let actions = '';
-      let datesStr = '';
-      
-      for(let i = cells.length - 1; i >= 0; i--) {
-        const text = cells[i].textContent.trim();
-        if (text.includes('Time:')) {
-          datesStr = text;
-        } else if (text === 'Completed' || text.includes('View Assignment') || text.includes('Submission link') || text.includes('expired')) {
-          actions = text;
-        }
-      }
+    if (row.querySelector('th') || row === targetTable.querySelector('tr')) return; // Skip headers
 
-      if (actions && !actions.includes('Completed') && !actions.includes('expired')) {
+    const cells = row.querySelectorAll('td');
+    // Ensure the row has enough columns
+    if (cells.length > Math.max(cAct, cDates) - 2) { 
+      const subject = cells[cSubj]?.textContent.trim() || '';
+      const instructor = cells[cInst]?.textContent.trim() || '';
+      const title = cells[cTitle]?.textContent.trim() || '';
+      const instructions = cells[cDesc]?.textContent.trim() || '';
+      const totalMarks = parseFloat(cells[cMarks]?.textContent.trim() || '0');
+      const actions = cells[cAct]?.textContent.trim() || '';
+      const datesStr = cells[cDates]?.textContent.trim() || '';
+
+      const actionLower = actions.toLowerCase();
+      const isCompleted = actionLower.includes('completed') || 
+                          actionLower.includes('submitted') || 
+                          actionLower.includes('expired');
+
+      // If not completed/expired, and it actually has a title, it's a valid pending assignment
+      if (!isCompleted && title) {
         const dateParts = datesStr.split('Time:');
         const rawDateStr = dateParts[0]?.trim() || '';
         const rawTimeStr = dateParts[1] ? 'Time: ' + dateParts[1].trim() : '';
@@ -100,15 +116,12 @@ function scanAndDownload() {
     return;
   }
 
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(assignments, null, 2));
-  const downloadAnchorNode = document.createElement('a');
-  downloadAnchorNode.setAttribute("href", dataStr);
-  downloadAnchorNode.setAttribute("download", "vmedulife_pending_assignments.json");
-  document.body.appendChild(downloadAnchorNode);
-  downloadAnchorNode.click();
-  downloadAnchorNode.remove();
-  
-  alert(`Successfully exported ${assignments.length} pending assignments!`);
+  // Send the payload to the background script to open the tracker tab
+  chrome.runtime.sendMessage({ type: 'SYNC_DATA', payload: assignments }, (response) => {
+    if (chrome.runtime.lastError) {
+      alert("Error communicating with extension. Make sure the extension is fully loaded and updated.");
+    }
+  });
 }
 
 function injectButton() {
@@ -117,7 +130,7 @@ function injectButton() {
   const btn = document.createElement('button');
   btn.id = 'vmedulife-scanner-btn';
   btn.className = 'vmedulife-scanner-btn';
-  btn.innerHTML = '📥 Download Pending Tasks';
+  btn.innerHTML = '🚀 Auto-Sync to Tracker';
   
   btn.addEventListener('click', scanAndDownload);
   
