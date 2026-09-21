@@ -1,9 +1,20 @@
 {
   "manifest_version": 3,
   "name": "Vmedulife Scanner for Assignment Tracker",
-  "version": "1.0",
-  "description": "Scans Vmedulife assignment pages and automatically syncs them to your Assignment Tracker.",
-  "permissions": ["activeTab", "storage", "tabs"],
+  "version": "1.1",
+  "description": "Scans Vmedulife assignments (from Dashboard or Assignment section) and automatically syncs them to your Assignment Tracker.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.vmedulife.com/*",
+    "http://localhost:*/*",
+    "http://127.0.0.1:*/*",
+    "*://vemedu-assign.vercel.app/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -11,14 +22,20 @@
     {
       "matches": ["*://*.vmedulife.com/*"],
       "js": ["content.js"],
-      "css": ["styles.css"]
+      "css": ["styles.css"],
+      "run_at": "document_idle"
     },
     {
-      "matches": ["http://localhost:5173/*", "*://*.vercel.app/*"],
-      "js": ["sync.js"]
+      "matches": [
+        "http://localhost:*/*",
+        "http://127.0.0.1:*/*",
+        "*://vemedu-assign.vercel.app/*"
+      ],
+      "js": ["sync.js"],
+      "run_at": "document_idle"
     }
   ],
   "action": {
-    "default_title": "Vmedulife Scanner Active"
+    "default_title": "Sync Vmedulife Assignments to Tracker"
   }
 }

@@ -80,21 +80,52 @@ export function useAssignments() {
     localStorage.setItem('tracker_assignments', JSON.stringify(assignments));
   }, [assignments]);
 
-  // Listen for the custom event emitted by the Chrome Extension (sync.js)
+  // Listen for sync events from Chrome Extension (postMessage, CustomEvent, storage)
   useEffect(() => {
-    const handleSync = () => {
+    const handleSync = (event) => {
+      let incoming = null;
+
+      // Handle postMessage channel
+      if (event && event.type === 'message' && event.data?.type === 'TRACKER_SYNC') {
+        incoming = event.data.payload;
+      }
+      // Handle CustomEvent channel
+      else if (event && event.type === 'tracker_sync' && event.detail) {
+        incoming = event.detail;
+      }
+
+      if (incoming && Array.isArray(incoming)) {
+        setAssignments(incoming);
+        return;
+      }
+
+      // Fallback: read directly from localStorage
       const saved = localStorage.getItem('tracker_assignments');
       if (saved) {
         try {
           setAssignments(JSON.parse(saved));
         } catch (e) {
-          console.error("Failed to parse synced data");
+          console.error("Failed to parse synced data", e);
         }
       }
     };
-    
+
+    window.addEventListener('message', handleSync);
     window.addEventListener('tracker_sync', handleSync);
-    return () => window.removeEventListener('tracker_sync', handleSync);
+    document.addEventListener('tracker_sync', handleSync);
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'tracker_assignments' && e.newValue) {
+        try {
+          setAssignments(JSON.parse(e.newValue));
+        } catch (err) {}
+      }
+    });
+
+    return () => {
+      window.removeEventListener('message', handleSync);
+      window.removeEventListener('tracker_sync', handleSync);
+      document.removeEventListener('tracker_sync', handleSync);
+    };
   }, []);
 
   const addAssignment = (assignment) => {
